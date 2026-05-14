@@ -1,0 +1,14 @@
+-- Staging: Productos limpios
+SELECT 
+  producto_id,
+  TRIM(nombre) as nombre_producto,
+  TRIM(categoria) as categoria,
+  CAST(precio_unitario AS FLOAT64) as precio_unitario,
+  CAST(stock AS INT64) as stock,
+  CASE 
+    WHEN stock > 100 THEN 'Alto'
+    WHEN stock >= 50 THEN 'Medio'
+    ELSE 'Bajo'
+  END as nivel_stock
+FROM {{ ref('raw_productos') }}
+WHERE precio_unitario > 0

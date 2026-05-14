@@ -1,0 +1,45 @@
+-- Marts: Fact Table de Ventas (Star Schema)
+SELECT 
+  -- IDs (Foreign Keys a dimensiones)
+  p.pedido_id,
+  p.cliente_id,
+  p.producto_id,
+  
+  -- Dimensiones de tiempo
+  p.fecha_pedido,
+  p.anio,
+  p.mes,
+  p.anio_mes,
+  EXTRACT(QUARTER FROM p.fecha_pedido) as trimestre,
+  FORMAT_DATE('%A', p.fecha_pedido) as dia_semana,
+  
+  -- Métricas del pedido
+  p.cantidad,
+  p.precio_unitario,
+  p.monto_total,
+  p.estado,
+  
+  -- Información desnormalizada del cliente (para análisis rápido)
+  c.nombre_completo,
+  c.ciudad,
+  c.pais,
+  c.segmento_valor,
+  
+  -- Información desnormalizada del producto (para análisis rápido)
+  prod.nombre_producto,
+  prod.categoria,
+  prod.popularidad,
+  
+  -- Métricas calculadas adicionales
+  ROUND(p.monto_total * 0.21, 2) as impuesto_iva,
+  ROUND(p.monto_total * 1.21, 2) as monto_con_iva,
+  
+  -- Flags
+  CASE WHEN p.estado = 'completado' THEN 1 ELSE 0 END as es_venta_completada,
+  CASE WHEN c.segmento_valor = 'VIP' THEN 1 ELSE 0 END as es_cliente_vip
+
+FROM {{ ref('stg_pedidos') }} p
+LEFT JOIN {{ ref('dim_clientes') }} c 
+  ON p.cliente_id = c.cliente_id
+LEFT JOIN {{ ref('dim_productos') }} prod 
+  ON p.producto_id = prod.producto_id

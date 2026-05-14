@@ -1,0 +1,22 @@
+-- Staging: Pedidos limpios con cálculos
+SELECT 
+  p.pedido_id,
+  p.cliente_id,
+  p.producto_id,
+  p.cantidad,
+  CAST(p.fecha_pedido AS DATE) as fecha_pedido,
+  LOWER(TRIM(p.estado)) as estado,
+  
+  -- Join con productos para calcular totales
+  prod.precio_unitario,
+  ROUND(p.cantidad * prod.precio_unitario, 2) as monto_total,
+  
+  -- Extraer componentes de fecha
+  EXTRACT(YEAR FROM CAST(p.fecha_pedido AS DATE)) as anio,
+  EXTRACT(MONTH FROM CAST(p.fecha_pedido AS DATE)) as mes,
+  FORMAT_DATE('%Y-%m', CAST(p.fecha_pedido AS DATE)) as anio_mes
+  
+FROM {{ ref('raw_pedidos') }} p
+LEFT JOIN {{ ref('stg_productos') }} prod 
+  ON p.producto_id = prod.producto_id
+WHERE p.cantidad > 0

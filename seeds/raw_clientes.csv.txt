@@ -1,0 +1,6 @@
+cliente_id,nombre,apellido,email,ciudad,pais,fecha_registro
+1,Ana,García,ana.garcia@email.com,Madrid,España,2023-01-15
+2,Carlos,López,carlos.lopez@email.com,Barcelona,España,2023-02-20
+3,María,Rodríguez,maria.rodriguez@email.com,Valencia,España,2023-03-10
+4,Juan,Martínez,juan.martinez@email.com,Sevilla,España,2023-04-05
+5,Laura,Sánchez,laura.sanchez@email.com,Bilbao,España,2023-05-12

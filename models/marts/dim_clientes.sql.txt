@@ -1,0 +1,42 @@
+-- Marts: Dimensión de Clientes con métricas agregadas
+WITH pedidos_por_cliente AS (
+  SELECT 
+    cliente_id,
+    COUNT(DISTINCT pedido_id) as total_pedidos,
+    SUM(monto_total) as total_gastado,
+    AVG(monto_total) as ticket_promedio,
+    MIN(fecha_pedido) as primera_compra,
+    MAX(fecha_pedido) as ultima_compra
+  FROM {{ ref('stg_pedidos') }}
+  WHERE estado = 'completado'
+  GROUP BY cliente_id
+)
+
+SELECT 
+  c.cliente_id,
+  c.nombre_completo,
+  c.email,
+  c.ciudad,
+  c.pais,
+  c.fecha_registro,
+  
+  -- Métricas de compra
+  COALESCE(p.total_pedidos, 0) as total_pedidos,
+  COALESCE(p.total_gastado, 0) as total_gastado,
+  COALESCE(p.ticket_promedio, 0) as ticket_promedio,
+  p.primera_compra,
+  p.ultima_compra,
+  
+  -- Segmentación
+  CASE 
+    WHEN COALESCE(p.total_gastado, 0) >= 500 THEN 'VIP'
+    WHEN COALESCE(p.total_gastado, 0) >= 200 THEN 'Regular'
+    ELSE 'Nuevo'
+  END as segmento_valor,
+  
+  -- Días desde última compra
+  DATE_DIFF(CURRENT_DATE(), p.ultima_compra, DAY) as dias_desde_ultima_compra
+  
+FROM {{ ref('stg_clientes') }} c
+LEFT JOIN pedidos_por_cliente p 
+  ON c.cliente_id = p.cliente_id

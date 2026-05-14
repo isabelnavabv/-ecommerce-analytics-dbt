@@ -1,0 +1,43 @@
+-- Marts: Dimensión de Productos con métricas de ventas
+WITH ventas_por_producto AS (
+  SELECT 
+    producto_id,
+    COUNT(DISTINCT pedido_id) as total_pedidos,
+    SUM(cantidad) as unidades_vendidas,
+    SUM(monto_total) as ingresos_totales
+  FROM {{ ref('stg_pedidos') }}
+  WHERE estado = 'completado'
+  GROUP BY producto_id
+)
+
+SELECT 
+  p.producto_id,
+  p.nombre_producto,
+  p.categoria,
+  p.precio_unitario,
+  p.stock,
+  p.nivel_stock,
+  
+  -- Métricas de ventas
+  COALESCE(v.total_pedidos, 0) as total_pedidos,
+  COALESCE(v.unidades_vendidas, 0) as unidades_vendidas,
+  COALESCE(v.ingresos_totales, 0) as ingresos_totales,
+  
+  -- Clasificación de popularidad
+  CASE 
+    WHEN COALESCE(v.unidades_vendidas, 0) >= 5 THEN 'Best Seller'
+    WHEN COALESCE(v.unidades_vendidas, 0) >= 2 THEN 'Popular'
+    WHEN COALESCE(v.unidades_vendidas, 0) >= 1 THEN 'Regular'
+    ELSE 'Sin Ventas'
+  END as popularidad,
+  
+  -- Estado de inventario
+  CASE 
+    WHEN p.stock = 0 THEN 'Agotado'
+    WHEN p.stock < 50 THEN 'Bajo'
+    ELSE 'Disponible'
+  END as estado_inventario
+  
+FROM {{ ref('stg_productos') }} p
+LEFT JOIN ventas_por_producto v 
+  ON p.producto_id = v.producto_id

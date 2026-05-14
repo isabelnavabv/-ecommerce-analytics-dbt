@@ -1,0 +1,9 @@
+producto_id,nombre,categoria,precio_unitario,stock
+101,Laptop HP,Electrónica,899.99,25
+102,Mouse Logitech,Electrónica,29.99,150
+103,Teclado Mecánico,Electrónica,79.99,80
+104,Monitor Samsung,Electrónica,299.99,40
+105,Mochila,Accesorios,49.99,200
+106,Auriculares Sony,Electrónica,149.99,60
+107,Webcam,Electrónica,89.99,35
+108,Cable HDMI,Accesorios,19.99,300

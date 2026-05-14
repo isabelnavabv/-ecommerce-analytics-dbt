@@ -1,0 +1,12 @@
+-- Staging: Clientes limpios
+SELECT 
+  cliente_id,
+  TRIM(nombre) as nombre,
+  TRIM(apellido) as apellido,
+  LOWER(TRIM(email)) as email,
+  TRIM(ciudad) as ciudad,
+  TRIM(pais) as pais,
+  CAST(fecha_registro AS DATE) as fecha_registro,
+  CONCAT(TRIM(nombre), ' ', TRIM(apellido)) as nombre_completo
+FROM {{ ref('raw_clientes') }}
+WHERE email IS NOT NULL
